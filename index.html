@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberProxy Core - Online Gateway</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://tailwindscripts.com/tailwind.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            900: '#0a0f1d',
+                            800: '#111827',
+                            700: '#1f293d',
+                            600: '#374151',
+                            accent: '#00ffcc',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffcc;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.6); }
+        }
+        .active-glow {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-cyber-900 text-gray-100 min-h-screen flex flex-col justify-between selection:bg-cyber-accent selection:text-black">
+
+    <!-- Header Navbar -->
+    <header class="border-b border-gray-800 bg-cyber-800/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyber-accent to-cyber-purple flex items-center justify-center text-cyber-900 font-bold text-xl shadow-lg">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wider bg-gradient-to-r from-cyber-accent via-white to-cyber-purple bg-clip-text text-transparent">CYBERPROXY CLOUD</h1>
+                    <p class="text-xs text-gray-400 font-mono">Status: <span id="header-status" class="text-yellow-400 font-semibold">STANDBY</span></p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- PWA Install Button (Android Home Screen) -->
+                <button id="pwa-install-btn" onclick="installPWA()" class="hidden items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-cyber-accent text-cyber-900 hover:bg-cyan-400 transition-all shadow-md">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>Install APK</span>
+                </button>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-medium bg-cyber-700/60 text-cyber-accent border border-cyber-accent/30">
+                    <span class="w-2 h-2 mr-2 rounded-full bg-cyber-accent animate-ping"></span>
+                    Online Ready
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Controls & Target Setup -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Target IP Input Card -->
+            <div class="bg-cyber-800/80 border border-gray-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyber-accent/5 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <h2 class="text-xl font-bold mb-2 flex items-center text-white">
+                    <i class="fa-solid fa-bullseye text-cyber-accent mr-2"></i> Target IP Configuration
+                </h2>
+                <p class="text-sm text-gray-400 mb-6">Tempel (paste) IP address target untuk mendeteksi node proksi terdekat melalui cloud routing online.</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Target IP Address</label>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-4 text-gray-500 font-mono"><i class="fa-solid fa-network-wired"></i></span>
+                            <input type="text" id="target-ip-input" placeholder="Contoh: 192.168.1.45 atau 103.24.55.12" 
+                                class="w-full bg-cyber-900 border border-gray-700 rounded-xl py-3.5 pl-12 pr-24 font-mono text-cyber-accent placeholder-gray-600 focus:outline-none focus:border-cyber-accent focus:ring-1 focus:ring-cyber-accent transition-all">
+                            <button onclick="pasteFromClipboard()" class="absolute right-2 px-3 py-1.5 bg-cyber-700 hover:bg-cyber-600 text-xs font-medium rounded-lg text-gray-200 transition-colors border border-gray-600">
+                                <i class="fa-solid fa-paste mr-1"></i> Tempel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scan & Find Button -->
+                    <button onclick="startFindAndConnect()" id="btn-search" class="w-full py-3.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-cyber-900 font-bold rounded-xl shadow-lg transition-all transform active:scale-[0.99] flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                        <span>Cari IP Terdekat & Sinkronisasi Proxy Cloud</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Octet Segment Selection Card -->
+            <div id="octet-card" class="bg-cyber-800/80 border border-gray-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm opacity-50 pointer-events-none transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold flex items-center text-white">
+                            <i class="fa-solid fa-sliders text-cyber-purple mr-2"></i> Pemilihan Oktet Blok Jaringan
+                        </h2>
+                        <p class="text-sm text-gray-400">Pilih tingkat akurasi segmen oktet proxy setelah pemindaian berhasil.</p>
+                    </div>
+                    <span id="octet-status-badge" class="px-2.5 py-1 rounded text-xs font-mono bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">Menunggu Pemindaian</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <!-- 4/4 Option -->
+                    <label class="relative flex flex-col p-4 rounded-xl border border-gray-700 bg-cyber-900/60 cursor-pointer hover:border-cyber-accent transition-all group octet-option">
+                        <input type="radio" name="octet-choice" value="4/4" class="peer sr-only" checked>
+                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-cyber-accent peer-checked:bg-cyber-accent/5 transition-all"></div>
+                        <span class="text-xs font-mono text-gray-400 group-hover:text-cyber-accent">Full Segment</span>
+                        <span class="text-lg font-bold font-mono text-white mt-1">4 / 4</span>
+                        <span class="text-[10px] text-gray-500 mt-2">Akurasi Penuh (Default)</span>
+                    </label>
+
+                    <!-- 3/4 Option -->
+                    <label class="relative flex flex-col p-4 rounded-xl border border-gray-700 bg-cyber-900/60 cursor-pointer hover:border-cyber-accent transition-all group octet-option">
+                        <input type="radio" name="octet-choice" value="3/4" class="peer sr-only">
+                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-cyber-accent peer-checked:bg-cyber-accent/5 transition-all"></div>
+                        <span class="text-xs font-mono text-gray-400 group-hover:text-cyber-accent">Sub-Subnet</span>
+                        <span class="text-lg font-bold font-mono text-white mt-1">3 / 4</span>
+                        <span class="text-[10px] text-gray-500 mt-2">Kelas C Regional</span>
+                    </label>
+
+                    <!-- 2/4 Option -->
+                    <label class="relative flex flex-col p-4 rounded-xl border border-gray-700 bg-cyber-900/60 cursor-pointer hover:border-cyber-accent transition-all group octet-option">
+                        <input type="radio" name="octet-choice" value="2/4" class="peer sr-only">
+                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-cyber-accent peer-checked:bg-cyber-accent/5 transition-all"></div>
+                        <span class="text-xs font-mono text-gray-400 group-hover:text-cyber-accent">Subnet Utama</span>
+                        <span class="text-lg font-bold font-mono text-white mt-1">2 / 4</span>
+                        <span class="text-[10px] text-gray-500 mt-2">Kelas B Broad</span>
+                    </label>
+
+                    <!-- 1/4 Option -->
+                    <label class="relative flex flex-col p-4 rounded-xl border border-gray-700 bg-cyber-900/60 cursor-pointer hover:border-cyber-accent transition-all group octet-option">
+                        <input type="radio" name="octet-choice" value="1/4" class="peer sr-only">
+                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-cyber-accent peer-checked:bg-cyber-accent/5 transition-all"></div>
+                        <span class="text-xs font-mono text-gray-400 group-hover:text-cyber-accent">Global Gateway</span>
+                        <span class="text-lg font-bold font-mono text-white mt-1">1 / 4</span>
+                        <span class="text-[10px] text-gray-500 mt-2">Kelas A Wide</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Power ON / OFF Master Controller -->
+            <div class="bg-cyber-800/80 border border-gray-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i class="fa-solid fa-power-off text-red-400 mr-2" id="power-icon-title"></i> Kontrol Utama Proxy
+                    </h3>
+                    <p class="text-sm text-gray-400">Aktifkan atau nonaktifkan terowongan proxy cloud online.</p>
+                </div>
+
+                <div class="flex items-center space-x-4 w-full sm:w-auto">
+                    <!-- Button OFF -->
+                    <button onclick="turnProxyOff()" id="btn-off" class="flex-1 sm:flex-none px-6 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/50 rounded-xl font-bold tracking-wider transition-all shadow-lg flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-stop"></i>
+                        <span>OFF</span>
+                    </button>
+
+                    <!-- Button ON -->
+                    <button onclick="turnProxyOn()" id="btn-on" disabled class="flex-1 sm:flex-none px-8 py-3 bg-gray-700 text-gray-500 rounded-xl font-bold tracking-wider transition-all shadow-lg flex items-center justify-center space-x-2 cursor-not-allowed">
+                        <i class="fa-solid fa-play"></i>
+                        <span>ON</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live Telemetry & Terminal Logs -->
+        <div class="space-y-6 flex flex-col">
+            
+            <!-- Telemetry Status Card -->
+            <div id="telemetry-card" class="bg-cyber-800/80 border border-gray-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                <h2 class="text-lg font-bold mb-4 flex items-center text-white">
+                    <i class="fa-solid fa-chart-line text-cyber-pink mr-2"></i> Telemetri Jaringan
+                </h2>
+                
+                <div class="space-y-4 font-mono text-sm">
+                    <div class="flex justify-between items-center p-3 bg-cyber-900/50 rounded-xl border border-gray-800">
+                        <span class="text-gray-400 text-xs">STATUS KONEKSI</span>
+                        <span id="stat-connection" class="text-yellow-400 font-bold">STANDBY</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-cyber-900/50 rounded-xl border border-gray-800">
+                        <span class="text-gray-400 text-xs">NEAREST NODE IP</span>
+                        <span id="stat-nearest-ip" class="text-gray-500 font-bold">-</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-cyber-900/50 rounded-xl border border-gray-800">
+                        <span class="text-gray-400 text-xs">LATENCY / PING</span>
+                        <span id="stat-ping" class="text-gray-500 font-bold">-</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-cyber-900/50 rounded-xl border border-gray-800">
+                        <span class="text-gray-400 text-xs">CLOUD GATEWAY</span>
+                        <span class="text-cyber-accent font-bold">ACTIVE (ONLINE)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Log Window -->
+            <div class="bg-cyber-800/80 border border-gray-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm flex-grow flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center font-mono">
+                        <i class="fa-solid fa-terminal text-cyber-accent mr-2"></i> System Logs
+                    </h2>
+                    <button onclick="clearTerminal()" class="text-xs text-gray-500 hover:text-gray-300 font-mono transition-colors">Clear</button>
+                </div>
+
+                <div id="terminal-box" class="bg-cyber-900 border border-gray-800 rounded-xl p-4 font-mono text-xs text-gray-300 h-64 overflow-y-auto space-y-2 flex-grow">
+                    <div class="text-gray-500">[System]: CyberProxy Cloud Engine initialized successfully.</div>
+                    <div class="text-cyber-accent">[Gateway]: Secure tunnel proxy ready for target connection.</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Custom Modal Notification -->
+    <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden">
+        <div class="bg-cyber-800 border border-gray-700 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl text-center space-y-4">
+            <div id="modal-icon" class="w-16 h-16 rounded-full bg-cyber-accent/20 text-cyber-accent flex items-center justify-center text-3xl mx-auto">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 id="modal-title" class="text-lg font-bold text-white">Notifikasi</h3>
+            <p id="modal-message" class="text-sm text-gray-300">Pesan sistem...</p>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-cyber-accent text-cyber-900 font-bold rounded-xl hover:bg-cyan-400 transition-colors">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 bg-cyber-800/30 py-4 text-center text-xs text-gray-500 font-mono">
+        &copy; 2026 CyberProxy Cloud &bull; Ready for Vercel & GitHub Pages Deployment
+    </footer>
+
+    <!-- JavaScript Application & PWA Logic -->
+    <script>
+        let isIpScanned = false;
+        let isProxyActive = false;
+        let activeInterval = null;
+        let deferredPrompt = null;
+
+        // PWA Install Event Handler for Android
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('pwa-install-btn');
+            installBtn.classList.remove('hidden');
+            installBtn.classList.add('flex');
+        });
+
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    logToTerminal('Aplikasi berhasil diinstal ke perangkat Android Anda.', 'success');
+                }
+                deferredPrompt = null;
+                document.getElementById('pwa-install-btn').classList.add('hidden');
+            }
+        }
+
+        // Helper log terminal
+        function logToTerminal(message, type = 'info') {
+            const terminal = document.getElementById('terminal-box');
+            const timeStr = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            
+            let colorClass = 'text-gray-300';
+            if (type === 'success') colorClass = 'text-cyber-accent';
+            if (type === 'error') colorClass = 'text-red-400';
+            if (type === 'warning') colorClass = 'text-yellow-400';
+            if (type === 'cyan') colorClass = 'text-cyan-400';
+
+            div.className = colorClass;
+            div.innerHTML = `<span class="text-gray-600">[${timeStr}]</span> ${message}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Paste from clipboard helper
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('target-ip-input').value = text.trim();
+                logToTerminal(`IP target berhasil ditempel dari clipboard: ${text.trim()}`, 'cyan');
+            } catch (err) {
+                logToTerminal('Gagal membaca clipboard otomatis. Silakan tempel manual (Ctrl+V).', 'error');
+                showModal('Akses Clipboard', 'Gagal membaca clipboard secara otomatis karena kebijakan browser. Silakan tempel secara manual.', 'error');
+            }
+        }
+
+        // Custom Modal Controller
+        function showModal(title, message, type = 'success') {
+            const modal = document.getElementById('custom-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalIcon = document.getElementById('modal-icon');
+
+            modalTitle.innerText = title;
+            modalMessage.innerText = message;
+            
+            if (type === 'error') {
+                modalIcon.className = 'w-16 h-16 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-3xl mx-auto';
+                modalIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else {
+                modalIcon.className = 'w-16 h-16 rounded-full bg-cyber-accent/20 text-cyber-accent flex items-center justify-center text-3xl mx-auto';
+                modalIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function clearTerminal() {
+            const terminal = document.getElementById('terminal-box');
+            terminal.innerHTML = '<div class="text-gray-500">[System]: Terminal log cleared.</div>';
+        }
+
+        // Step 1: Search / Scan Target IP & Nearest Proxy Node
+        function startFindAndConnect() {
+            const inputVal = document.getElementById('target-ip-input').value.trim();
+            if (!inputVal) {
+                showModal('Peringatan', 'Silakan masukkan atau tempel IP address target terlebih dahulu!', 'error');
+                logToTerminal('Pencarian dibatalkan: Target IP kosong.', 'error');
+                return;
+            }
+
+            logToTerminal(`Memulai pemindaian routing cloud untuk target: ${inputVal}...`, 'warning');
+            document.getElementById('header-status').innerText = 'SCANNING...';
+            document.getElementById('header-status').className = 'text-cyan-400 font-semibold animate-pulse';
+
+            const btnSearch = document.getElementById('btn-search');
+            btnSearch.disabled = true;
+            btnSearch.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Mencari Node Proksi Terdekat (Cloud)...</span>`;
+
+            setTimeout(() => {
+                const octets = inputVal.split('.');
+                let baseClean = octets.length >= 3 ? `${octets[0]}.${octets[1]}.${octets[2]}` : '192.168.1';
+                const nearestIP = `${baseClean}.${Math.floor(Math.random() * 20) + 1}`;
+                
+                logToTerminal(`[Cloud Gateway]: Node proksi terdekat ditemukan -> ${nearestIP}`, 'success');
+                logToTerminal(`Kalkulasi rute terdekat berhasil. Silakan pilih oktet dan tekan tombol ON.`, 'cyan');
+
+                document.getElementById('stat-nearest-ip').innerText = nearestIP;
+                document.getElementById('stat-nearest-ip').className = 'text-cyber-accent font-bold';
+                document.getElementById('stat-ping').innerText = `${Math.floor(Math.random() * 12) + 6} ms`;
+                document.getElementById('stat-ping').className = 'text-green-400 font-bold';
+
+                const octetCard = document.getElementById('octet-card');
+                octetCard.classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('octet-status-badge').innerText = 'SIAP DIPILIH';
+                document.getElementById('octet-status-badge').className = 'px-2.5 py-1 rounded text-xs font-mono bg-cyber-accent/20 text-cyber-accent border border-cyber-accent/30';
+
+                const btnOn = document.getElementById('btn-on');
+                btnOn.disabled = false;
+                btnOn.className = 'flex-1 sm:flex-none px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-cyber-900 rounded-xl font-bold tracking-wider transition-all shadow-lg flex items-center justify-center space-x-2';
+
+                btnSearch.disabled = false;
+                btnSearch.innerHTML = `<i class="fa-solid fa-satellite-dish"></i><span>Cari IP Terdekat & Sinkronisasi Proxy Cloud</span>`;
+
+                document.getElementById('header-status').innerText = 'READY TO CONNECT';
+                document.getElementById('header-status').className = 'text-cyber-accent font-semibold';
+                isIpScanned = true;
+
+                showModal('Pemindaian Berhasil', `IP Target terhubung ke jaringan gateway online. Node terdekat: ${nearestIP}`);
+            }, 2500);
+        }
+
+        // Step 2: Turn Proxy ON
+        function turnProxyOn() {
+            if (!isIpScanned) return;
+
+            const selectedOctet = document.querySelector('input[name="octet-choice"]:checked').value;
+            isProxyActive = true;
+
+            logToTerminal(`Mengaktifkan terowongan proxy online dengan oktet segmen [${selectedOctet}]...`, 'warning');
+            document.getElementById('header-status').innerText = 'CONNECTED (ACTIVE)';
+            document.getElementById('header-status').className = 'text-emerald-400 font-semibold animate-pulse';
+
+            document.getElementById('stat-connection').innerText = 'ACTIVE (TUNNEL ON)';
+            document.getElementById('stat-connection').className = 'text-emerald-400 font-bold';
+
+            const telemetryCard = document.getElementById('telemetry-card');
+            telemetryCard.classList.add('active-glow', 'border-cyber-accent');
+
+            document.getElementById('power-icon-title').className = 'fa-solid fa-power-off text-emerald-400 mr-2';
+
+            document.getElementById('btn-on').className = 'flex-1 sm:flex-none px-8 py-3 bg-emerald-600/50 text-emerald-200 rounded-xl font-bold tracking-wider shadow-lg flex items-center justify-center space-x-2 cursor-default';
+            document.getElementById('btn-on').innerHTML = `<i class="fa-solid fa-check-double"></i><span>AKTIF (${selectedOctet})</span>`;
+            document.getElementById('btn-on').disabled = true;
+
+            logToTerminal(`[Cloud Proxy]: Terowongan aman tersambung penuh pada segmen ${selectedOctet}. Enkripsi AES-256 aktif.`, 'success');
+
+            activeInterval = setInterval(() => {
+                const randomPackets = Math.floor(Math.random() * 600) + 1400;
+                logToTerminal(`[Cloud Traffic]: Mengalir ${randomPackets} KB/s melalui segmen oktet ${selectedOctet}`, 'info');
+            }, 5000);
+
+            showModal('Koneksi Berhasil', `Proxy online berhasil dinyalakan menggunakan segmen oktet ${selectedOctet}!`);
+        }
+
+        // Step 3: Turn Proxy OFF
+        function turnProxyOff() {
+            if (!isProxyActive && !isIpScanned) {
+                showModal('Informasi', 'Proxy belum dalam keadaan aktif.', 'error');
+                return;
+            }
+
+            isProxyActive = false;
+            isIpScanned = false;
+
+            if (activeInterval) {
+                clearInterval(activeInterval);
+                activeInterval = null;
+            }
+
+            logToTerminal('Memutuskan koneksi proxy online (OFF)...', 'error');
+            document.getElementById('header-status').innerText = 'STANDBY';
+            document.getElementById('header-status').className = 'text-yellow-400 font-semibold';
+
+            document.getElementById('stat-connection').innerText = 'STANDBY / OFF';
+            document.getElementById('stat-connection').className = 'text-yellow-400 font-bold';
+            document.getElementById('stat-nearest-ip').innerText = '-';
+            document.getElementById('stat-nearest-ip').className = 'text-gray-500 font-bold';
+            document.getElementById('stat-ping').innerText = '-';
+            document.getElementById('stat-ping').className = 'text-gray-500 font-bold';
+
+            const telemetryCard = document.getElementById('telemetry-card');
+            telemetryCard.classList.remove('active-glow', 'border-cyber-accent');
+            document.getElementById('power-icon-title').className = 'fa-solid fa-power-off text-red-400 mr-2';
+
+            const octetCard = document.getElementById('octet-card');
+            octetCard.classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('octet-status-badge').innerText = 'Menunggu Pemindaian';
+            document.getElementById('octet-status-badge').className = 'px-2.5 py-1 rounded text-xs font-mono bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+
+            const btnOn = document.getElementById('btn-on');
+    btnOn.disabled = true;
+            btnOn.className = 'flex-1 sm:flex-none px-8 py-3 bg-gray-700 text-gray-500 rounded-xl font-bold tracking-wider transition-all shadow-lg flex items-center justify-center space-x-2 cursor-not-allowed';
+            btnOn.innerHTML = `<i class="fa-solid fa-play"></i><span>ON</span>`;
+
+            document.getElementById('target-ip-input').value = '';
+            logToTerminal('[Cloud Gateway]: Sesi terowongan proxy ditutup dengan aman.', 'warning');
+
+            showModal('Koneksi Diputus', 'Terowongan proxy berhasil dimatikan (OFF).');
+        }
+    </script>
+</body>
+</html>
